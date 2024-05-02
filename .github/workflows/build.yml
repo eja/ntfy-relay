@@ -19,13 +19,19 @@ jobs:
           java-version: '17'
 
       - name: Build and export APK
+      env:
+        ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+        ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}      
         run: |
+          echo $ANDROID_KEYSTORE | base64 --decode > release-key.jks
           ./gradlew assembleRelease
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            app/build/outputs/apk/release/app-release-unsigned.apk
+            app/build/outputs/apk/release/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
