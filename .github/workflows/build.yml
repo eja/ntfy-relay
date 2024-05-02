@@ -1,0 +1,32 @@
+name: Android Build and Publish on Release
+
+on:
+  release:
+    types: [published]
+    paths:
+      - '**/*.apk'
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+
+      - name: Build and export APK
+        run: |
+          ./gradlew assembleRelease
+          mkdir -p artifacts
+          cp app/build/outputs/release/app-release.apk artifacts/
+
+      - name: Upload APK to GitHub Releases
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-release.apk
+          path: artifacts/app-release.apk
+
