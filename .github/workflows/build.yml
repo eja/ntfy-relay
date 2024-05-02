@@ -22,9 +22,10 @@ jobs:
         run: |
           ./gradlew assembleRelease
 
-      - name: Upload APK to GitHub Releases
-        uses: actions/upload-artifact@v4
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: app-release-unsigned.apk
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
-
+          files: |
+            app/build/outputs/apk/release/app-release-unsigned.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
