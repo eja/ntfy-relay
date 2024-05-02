@@ -22,7 +22,7 @@ jobs:
         run: |
           ./gradlew assembleRelease
           mkdir -p artifacts
-          cp app/build/outputs/release/app-release.apk artifacts/
+          cp app/build/outputs/release/app-release-unsigned.apk artifacts/
 
       - name: Upload APK to GitHub Releases
         uses: actions/upload-artifact@v2
