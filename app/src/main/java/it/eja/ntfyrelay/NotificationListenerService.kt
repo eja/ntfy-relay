@@ -21,8 +21,9 @@ class NotificationListenerService : NotificationListenerService() {
 
         val sharedPreferences = getSharedPreferences("MyPrefs", MODE_PRIVATE)
         val url = sharedPreferences.getString("URL", "")
+        var active: Boolean = sharedPreferences.getBoolean("ACTIVE", false)
 
-        if (url != null && url.toString() != "") {
+        if (active == true && url != null && url.toString() != "") {
             val thread = Thread {
                 try {
                     sender.sendNotification(url, title, text)

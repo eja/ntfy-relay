@@ -9,8 +9,10 @@ import android.os.Bundle
 import android.widget.EditText
 import androidx.activity.ComponentActivity
 import androidx.core.app.NotificationManagerCompat
-import android.widget.Button
-import android.widget.Toast;
+import android.widget.Switch
+import android.widget.Toast
+import android.view.inputmethod.EditorInfo
+
 
 class MainActivity : ComponentActivity() {
 
@@ -31,15 +33,26 @@ class MainActivity : ComponentActivity() {
         val url = sharedPreferences.getString("URL", "")
         val urlInput = findViewById<EditText>(R.id.url_input)
         urlInput.setText(url)
+        urlInput?.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_UNSPECIFIED) {
+                val editor = sharedPreferences.edit()
+                editor.putString("URL", urlInput?.text.toString().trim())
+                editor.apply()
+                Toast.makeText(this, "URL Updated", Toast.LENGTH_SHORT).show()
+                true
+            } else {
+                false
+            }
+        }
 
-        val submitButton = findViewById<Button>(R.id.submit_button)
-        submitButton.setOnClickListener {
-            val urlString = urlInput.text.toString()
-            val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
+        val active = sharedPreferences.getBoolean("ACTIVE", false)
+        val switchButton=findViewById<Switch>(R.id.switch1)
+        switchButton.isChecked=active
+        switchButton.setOnCheckedChangeListener { _, isChecked ->
             val editor = sharedPreferences.edit()
-            editor.putString("URL", urlString)
+            editor.putBoolean("ACTIVE", isChecked)
             editor.apply()
-            Toast.makeText(this, "Value saved successfully", Toast.LENGTH_SHORT).show()
         }
     }
 
