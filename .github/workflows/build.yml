@@ -10,7 +10,7 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     env:
-       APP_NAME: ${{ github.repository_owner }}_${{ github.repository }}
+       APP_NAME: ${{ github.repository_owner }}_${{ github.event.repository.name }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
