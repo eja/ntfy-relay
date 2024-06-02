@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    env:
+       APP_NAME: ${{ github.repository_owner }}_${{ github.repository }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -18,13 +20,35 @@ jobs:
         with:
           java-version: '17'
 
-      - name: Build    
+      - name: Build AAB
         run: |
-          ./gradlew assembleRelease
+          ./gradlew clean
+          ./gradlew bundleRelease --no-daemon --warning-mode all
+
+      - name: Sign AAB
+        id: sign_app_aab
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/bundle/release
+          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE }}
+          alias: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Copy
+        run: |
+          cp app/build/outputs/bundle/release/app-release.aab ${{ env.APP_NAME }}.aab
+
+      - name: Build APK
+        run: |
+          ./gradlew clean
+          ./gradlew assembleRelease --no-daemon --warning-mode all
 
       - name: Sign APK
+        id: sign_app_apk
         uses: r0adkll/sign-android-release@v1
-        id: sign_app
         with:
           releaseDirectory: app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE }}
@@ -34,14 +58,15 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
 
-      - name: Rename
+      - name: Copy
         run: |
-          mv app/build/outputs/apk/release/app-release-unsigned-signed.apk ntfy-relay.apk
-      
-      - name: Release
+          cp app/build/outputs/apk/release/app-release-unsigned-signed.apk ${{ env.APP_NAME }}.apk
+
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ntfy-relay.apk
+            ${{ env.APP_NAME }}.apk
+            ${{ env.APP_NAME }}.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
